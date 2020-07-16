@@ -57,7 +57,7 @@ def generate(i, o) :
     isomap = eos.render.extract_texture(mesh, pose, img)
     isomap = cv2.transpose(isomap)
     eos.core.write_textured_obj(mesh, o + ".obj")
-    cv2.imwrite(o + ".isomap.png", isomap)
+    cv2.imwrite(o + ".isomap.bmp", isomap)
 
 if __name__ == "__main__":
     generate(sys.argv[1], sys.argv[2])
