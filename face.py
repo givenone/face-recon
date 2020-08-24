@@ -18,9 +18,21 @@ def read_pts(filename):
 
     return landmarks
 
+def visualize_dominant(counts, palette, img) :
+    import matplotlib.pyplot as plt
 
+    indices = np.argsort(counts)[::-1]   
+    freqs = np.cumsum(np.hstack([[0], counts[indices]/counts.sum()]))
+    rows = np.int_(img.shape[0]*freqs)
 
-def generate(i, o) :
+    dom_patch = np.zeros(shape=img.shape, dtype=np.uint8)
+    for i in range(len(rows) - 1):
+        dom_patch[rows[i]:rows[i + 1], :, :] += np.uint8(palette[indices[i]])
+
+    plt.imshow(cv2.cvtColor(dom_patch, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+def generate(i, o, mask) : # input name, output name
     # load detector,shape predictor and image
     detector = dlib.get_frontal_face_detector()
     shape_predictor = dlib.shape_predictor('res/68.dat')
@@ -54,10 +66,42 @@ def generate(i, o) :
     (mesh, pose, shape_coeffs, blendshape_coeffs) = eos.fitting.fit_shape_and_pose(morphablemodel_with_expressions,
         landmarks, landmark_mapper, image_width, image_height, edge_topology, contour_landmarks, model_contour)
 
+    # read segmetation mask
+    seg = cv2.imread(mask) # 0 : background , 127 : hair, 254 : face // grayscale image
+    seg = cv2.cvtColor(seg, cv2.COLOR_BGR2GRAY)
+    
+    # mask
+    background = seg == 0
+    hair = seg == 127
+    face = seg == 254
+    # find donminant face color..
+    #pixels = np.float32(img[face].reshape(-1, 3))
+    
+    pixels = img[face].astype('float32')
+    n_colors = 5
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 200, .1)
+    flags = cv2.KMEANS_RANDOM_CENTERS
+
+    _, labels, palette = cv2.kmeans(pixels, n_colors, None, criteria, 10, flags)
+    _, counts = np.unique(labels, return_counts=True)
+    
+    # option 1
+    dominant = palette[np.argmax(counts)] # dominant color.
+    
+    # option 2
+    dominant = np.average(palette, axis=0 ,weights=counts)
+    
+    #visualize_dominant(counts, palette, img)
+    # for debugging
+    
+    img[hair] = dominant
+    img[background] = dominant
+    #img
+
     isomap = eos.render.extract_texture(mesh, pose, img)
     isomap = cv2.transpose(isomap)
     eos.core.write_textured_obj(mesh, o + ".obj")
-    cv2.imwrite(o + ".isomap.bmp", isomap)
+    cv2.imwrite(o + ".isomap.png", isomap)
 
 if __name__ == "__main__":
-    generate(sys.argv[1], sys.argv[2])
+    generate(sys.argv[1], sys.argv[2], sys.argv[3])
