@@ -3,7 +3,7 @@
  *
  * File: include/eos/render/draw_utils.hpp
  *
- * Copyright 2017 Patrik Huber
+ * Copyright 2017-2019 Patrik Huber
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,102 @@
 #define EOS_RENDER_DRAW_UTILS_HPP
 
 #include "eos/core/Mesh.hpp"
-#include "eos/render/detail/render_detail.hpp"
+#include "eos/render/detail/utils.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/mat4x4.hpp"
 #include "glm/vec4.hpp"
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
 namespace eos {
 namespace render {
+
+/**
+ * Draws a line using the Bresenham algorithm.
+ *
+ * From: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+ * I also tried this: https://www.thecrazyprogrammer.com/2017/01/bresenhams-line-drawing-algorithm-c-c.html
+ * which looks awesome, but it drew weird lines.
+ *
+ * @param[in] image An image to draw into.
+ * @param[in] x0 X coordinate of the start point.
+ * @param[in] y0 Y coordinate of the start point.
+ * @param[in] x1 X coordinate of the start point.
+ * @param[in] y1 Y coordinate of the end point.
+ * @param[in] color RGB colour of the line to be drawn.
+ */
+
+inline void draw_line(core::Image3u& image, float x0, float y0, float x1, float y1, glm::vec3 color)
+{
+    auto plot_line_low = [&image, &color](float x0, float y0, float x1, float y1) {
+        float dx = x1 - x0;
+        float dy = y1 - y0;
+        int yi = 1;
+        if (dy < 0)
+        {
+            yi = -1;
+            dy = -dy;
+        }
+
+        float D = 2 * dy - dx;
+        float y = y0;
+
+        for (int x = x0; x <= x1; ++x) // for x from x0 to x1
+        {
+            image(y, x) = {color[0], color[1], color[2]}; // plot(x, y);
+            if (D > 0)
+            {
+                y = y + yi;
+                D = D - 2 * dx;
+            }
+            D = D + 2 * dy;
+        }
+    };
+
+    auto plot_line_high = [&image, &color](float x0, float y0, float x1, float y1) {
+        float dx = x1 - x0;
+        float dy = y1 - y0;
+        int xi = 1;
+        if (dx < 0)
+        {
+            xi = -1;
+            dx = -dx;
+        }
+
+        float D = 2 * dx - dy;
+        float x = x0;
+
+        for (int y = y0; y <= y1; ++y) // for y from y0 to y1
+        {
+            image(y, x) = {color[0], color[1], color[2]}; // plot(x, y);
+            if (D > 0)
+            {
+                x = x + xi;
+                D = D - 2 * dy;
+            }
+            D = D + 2 * dx;
+        }
+    };
+
+    if (abs(y1 - y0) < abs(x1 - x0))
+    {
+        if (x0 > x1)
+        {
+            plot_line_low(x1, y1, x0, y0);
+        } else
+        {
+            plot_line_low(x0, y0, x1, y1);
+        }
+    } else
+    {
+        if (y0 > y1)
+        {
+            plot_line_high(x1, y1, x0, y0);
+        } else
+        {
+            plot_line_high(x0, y0, x1, y1);
+        }
+    }
+};
 
 /**
  * Draws the given mesh as wireframe into the image.
@@ -45,11 +130,10 @@ namespace render {
  * @param[in] modelview Model-view matrix to draw the mesh.
  * @param[in] projection Projection matrix to draw the mesh.
  * @param[in] viewport Viewport to draw the mesh.
- * @param[in] color Colour of the mesh to be drawn.
+ * @param[in] color Colour of the mesh to be drawn, in RGB.
  */
-inline void draw_wireframe(cv::Mat image, const core::Mesh& mesh, glm::mat4x4 modelview,
-                           glm::mat4x4 projection, glm::vec4 viewport,
-                           cv::Scalar color = cv::Scalar(0, 255, 0, 255))
+inline void draw_wireframe(core::Image3u& image, const core::Mesh& mesh, glm::mat4x4 modelview,
+                           glm::mat4x4 projection, glm::vec4 viewport, glm::vec3 color = glm::vec3(0, 255, 0))
 {
     for (const auto& triangle : mesh.tvi)
     {
@@ -64,53 +148,11 @@ inline void draw_wireframe(cv::Mat image, const core::Mesh& mesh, glm::mat4x4 mo
             modelview, projection, viewport);
         if (render::detail::are_vertices_ccw_in_screen_space(glm::vec2(p1), glm::vec2(p2), glm::vec2(p3)))
         {
-            cv::line(image, cv::Point(p1.x, p1.y), cv::Point(p2.x, p2.y), color);
-            cv::line(image, cv::Point(p2.x, p2.y), cv::Point(p3.x, p3.y), color);
-            cv::line(image, cv::Point(p3.x, p3.y), cv::Point(p1.x, p1.y), color);
+            draw_line(image, p1.x, p1.y, p2.x, p2.y, color);
+            draw_line(image, p2.x, p2.y, p3.x, p3.y, color);
+            draw_line(image, p3.x, p3.y, p1.x, p1.y, color);
         }
     }
-};
-
-/**
- * Draws the texture coordinates (uv-coords) of the given mesh
- * into an image by looping over the triangles and drawing each
- * triangle's texcoords.
- *
- * Note/Todo: This function has a slight problems, the lines do not actually get
- * drawn blue, if the image is 8UC4. Well if I save a PNG, it is blue. Not sure.
- *
- * @param[in] mesh A mesh with texture coordinates.
- * @param[in] image An optional image to draw onto.
- * @return An image with the texture coordinate triangles drawn in it, 512x512 if no image is given.
- */
-inline cv::Mat draw_texcoords(core::Mesh mesh, cv::Mat image = cv::Mat())
-{
-    using cv::Point2f;
-    using cv::Scalar;
-    if (image.empty())
-    {
-        image = cv::Mat(512, 512, CV_8UC4, Scalar(0.0f, 0.0f, 0.0f, 255.0f));
-    }
-
-    for (const auto& triIdx : mesh.tvi)
-    {
-        cv::line(
-            image,
-            Point2f(mesh.texcoords[triIdx[0]][0] * image.cols, mesh.texcoords[triIdx[0]][1] * image.rows),
-            Point2f(mesh.texcoords[triIdx[1]][0] * image.cols, mesh.texcoords[triIdx[1]][1] * image.rows),
-            Scalar(255.0f, 0.0f, 0.0f));
-        cv::line(
-            image,
-            Point2f(mesh.texcoords[triIdx[1]][0] * image.cols, mesh.texcoords[triIdx[1]][1] * image.rows),
-            Point2f(mesh.texcoords[triIdx[2]][0] * image.cols, mesh.texcoords[triIdx[2]][1] * image.rows),
-            Scalar(255.0f, 0.0f, 0.0f));
-        cv::line(
-            image,
-            Point2f(mesh.texcoords[triIdx[2]][0] * image.cols, mesh.texcoords[triIdx[2]][1] * image.rows),
-            Point2f(mesh.texcoords[triIdx[0]][0] * image.cols, mesh.texcoords[triIdx[0]][1] * image.rows),
-            Scalar(255.0f, 0.0f, 0.0f));
-    }
-    return image;
 };
 
 } /* namespace render */

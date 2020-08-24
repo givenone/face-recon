@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/generate-obj.dir/generate-obj.cpp.o"
-  "generate-obj.pdb"
   "generate-obj"
+  "generate-obj.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -1,8 +1,8 @@
-# Install script for directory: /home/givenone/EOS/eos
+# Install script for directory: /home/ubuntu/face-recon/eos
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/givenone/EOS/install")
+  set(CMAKE_INSTALL_PREFIX "/home/ubuntu/face-recon/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "Release")
+    set(CMAKE_INSTALL_CONFIG_NAME "")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -37,53 +37,58 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/include/")
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/share/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/include/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/cereal" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/3rdparty/cereal/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/share/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/glm/glm" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/3rdparty/glm/glm/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/cereal" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/3rdparty/cereal/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/glm" TYPE FILE FILES "/home/givenone/EOS/eos/3rdparty/glm/copying.txt")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/glm/glm" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/3rdparty/glm/glm/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/nanoflann/include" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/3rdparty/nanoflann/include/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/glm" TYPE FILE FILES "/home/ubuntu/face-recon/eos/3rdparty/glm/copying.txt")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/nanoflann" TYPE FILE FILES "/home/givenone/EOS/eos/3rdparty/nanoflann/COPYING")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/nanoflann/include" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/3rdparty/nanoflann/include/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/eigen3-nnls/src" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/3rdparty/eigen3-nnls/src/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/nanoflann" TYPE FILE FILES "/home/ubuntu/face-recon/eos/3rdparty/nanoflann/COPYING")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/eigen3-nnls" TYPE FILE FILES "/home/givenone/EOS/eos/3rdparty/eigen3-nnls/README.md")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/eigen3-nnls/src" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/3rdparty/eigen3-nnls/src/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/toml11" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/3rdparty/toml11/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/eigen3-nnls" TYPE FILE FILES "/home/ubuntu/face-recon/eos/3rdparty/eigen3-nnls/README.md")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/eigen/Eigen" TYPE DIRECTORY FILES "/home/givenone/EOS/eos/3rdparty/eigen/Eigen/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/toml11" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/3rdparty/toml11/")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/3rdparty/eigen/Eigen" TYPE DIRECTORY FILES "/home/ubuntu/face-recon/eos/3rdparty/eigen/Eigen/")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/givenone/EOS/build/examples/cmake_install.cmake")
+  include("/home/ubuntu/face-recon/build/examples/cmake_install.cmake")
 
 endif()
 
@@ -95,5 +100,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/givenone/EOS/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/ubuntu/face-recon/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
