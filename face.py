@@ -36,15 +36,13 @@ def generate(i, o, mask) : # input name, output name
     # load detector,shape predictor and image
     detector = dlib.get_frontal_face_detector()
     shape_predictor = dlib.shape_predictor('res/68.dat')
-    img = cv2.imread(i)
+    img = cv2.imread(i) # i : cropped square image.
     image_height, image_width, _ = img.shape
 
     # get bounding box and facial landmarks
     boxes = detector(img)
-    
     landmarks = []
     for box in boxes:
-        print(type(box.left()))
         shape = shape_predictor(img, box)
         index = 1
         for part in shape.parts():
@@ -72,6 +70,8 @@ def generate(i, o, mask) : # input name, output name
     seg = cv2.imread(mask) # 0 : background , 127 : hair, 254 : face // grayscale image
     seg = cv2.cvtColor(seg, cv2.COLOR_BGR2GRAY)
     
+    # need to up-sample mask so that mask is same size with input image.
+    seg = cv2.resize(seg, (img.shape[0], img.shape[1]))
     # mask
     background = seg == 0
     hair = seg == 127
