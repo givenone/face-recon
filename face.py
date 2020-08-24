@@ -41,8 +41,10 @@ def generate(i, o, mask) : # input name, output name
 
     # get bounding box and facial landmarks
     boxes = detector(img)
+    
     landmarks = []
     for box in boxes:
+        print(type(box.left()))
         shape = shape_predictor(img, box)
         index = 1
         for part in shape.parts():
