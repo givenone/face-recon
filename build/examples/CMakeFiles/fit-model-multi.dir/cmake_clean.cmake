@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/fit-model-multi.dir/fit-model-multi.cpp.o"
-  "fit-model-multi.pdb"
   "fit-model-multi"
+  "fit-model-multi.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

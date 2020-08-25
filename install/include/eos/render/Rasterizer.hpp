@@ -28,6 +28,7 @@
 #include "eos/render/Texture.hpp"
 #include "eos/render/detail/Vertex.hpp"
 #include "eos/render/detail/plane.hpp"
+#include "eos/render/detail/utils.hpp"
 #include "eos/cpp17/optional.hpp"
 
 #include <limits>
@@ -49,11 +50,7 @@ public:
     Rasterizer(int viewport_width, int viewport_height)
         : viewport_width(viewport_width), viewport_height(viewport_height)
     {
-        colorbuffer = eos::core::image::constant(viewport_height, viewport_width,
-			eos::core::Pixel<std::uint8_t, 4>(255, 255, 255, 255));
-        depthbuffer =
-            eos::core::image::constant(
-            viewport_height, viewport_width, std::numeric_limits<double>::max());
+        clear_buffers();
     };
 
     /**
@@ -171,12 +168,14 @@ public:
                     {
                         // perspective-correct barycentric weights
                         // Todo: Check this in the original/older implementation, i.e. if all is still
-                        // perspective-correct. I think so. Also compare 1:1 with OpenGL.
-                        double d = alpha * one_over_w0 + beta * one_over_w1 + gamma * one_over_w2;
-                        d = 1.0 / d;
-                        if (!extracting_tex) // Pass the uncorrected lambda if we're extracting tex... hack...
-                                             // do properly!
+                        //   perspective-correct. I think so. Also compare 1:1 with OpenGL.
+                        // This is the default case when rendering - we perspectively correct the barycentric
+                        //   weights. However when extracting texture, it seems we don't want to do that, and
+                        //   pass the uncorrected lambda in that case. This switch allows us to do that.
+                        if (perspective_correct_barycentric_weights)
                         {
+                            double d = alpha * one_over_w0 + beta * one_over_w1 + gamma * one_over_w2;
+                            d = 1.0 / d;
                             alpha *= d * one_over_w0; // In case of affine cam matrix, everything is 1 and
                                                       // a/b/g don't get changed.
                             beta *= d * one_over_w1;
@@ -254,12 +253,29 @@ public:
         }
     };
 
+    /**
+     * @brief Resets the colour and depth buffers.
+     *
+     * Sets the colour buffer to all white with zeros for the alpha channel, and the depth buffer to
+     * std::numeric_limits<double>::max().
+     *
+     * If multiple images are rendered/rasterised, then this function can be called before rendering a new
+     * image, to clear the colour and depth buffers.
+     */
+    void clear_buffers()
+    {
+        colorbuffer = eos::core::image::constant(viewport_height, viewport_width,
+                                                 eos::core::Pixel<std::uint8_t, 4>(255, 255, 255, 0));
+        depthbuffer =
+            eos::core::image::constant(viewport_height, viewport_width, std::numeric_limits<double>::max());
+    };
+
 private:
     FragmentShaderType fragment_shader;
 
 public:                            // will eventually go private
     bool enable_depth_test = true; // maybe get rid of this again, it was just as a hack.
-    bool extracting_tex = false;
+    bool perspective_correct_barycentric_weights = true;
     bool enable_far_clipping = true;
 
     int viewport_width;

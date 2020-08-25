@@ -98,8 +98,9 @@ def generate(i) : # input name, output name
     
     img[hair] = dominant
     img[background] = dominant
-    #img
-
+    
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
+    print(img.shape, type(img))
     isomap = eos.render.extract_texture(mesh, pose, img)
     isomap = cv2.transpose(isomap)
     eos.core.write_textured_obj(mesh, i + "face.obj")
