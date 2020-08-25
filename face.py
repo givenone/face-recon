@@ -32,11 +32,11 @@ def visualize_dominant(counts, palette, img) :
     plt.imshow(cv2.cvtColor(dom_patch, cv2.COLOR_BGR2RGB))
     plt.show()
 
-def generate(i, o, mask) : # input name, output name
+def generate(i) : # input name, output name
     # load detector,shape predictor and image
     detector = dlib.get_frontal_face_detector()
     shape_predictor = dlib.shape_predictor('res/68.dat')
-    img = cv2.imread(i) # i : cropped square image.
+    img = cv2.imread(i + "cropped.png") # i : cropped square image.
     image_height, image_width, _ = img.shape
 
     # get bounding box and facial landmarks
@@ -67,7 +67,7 @@ def generate(i, o, mask) : # input name, output name
         landmarks, landmark_mapper, image_width, image_height, edge_topology, contour_landmarks, model_contour)
 
     # read segmetation mask
-    seg = cv2.imread(mask) # 0 : background , 127 : hair, 254 : face // grayscale image
+    seg = cv2.imread(i+"mask.png") # 0 : background , 127 : hair, 254 : face // grayscale image
     seg = cv2.cvtColor(seg, cv2.COLOR_BGR2GRAY)
     
     # need to up-sample mask so that mask is same size with input image.
@@ -102,8 +102,8 @@ def generate(i, o, mask) : # input name, output name
 
     isomap = eos.render.extract_texture(mesh, pose, img)
     isomap = cv2.transpose(isomap)
-    eos.core.write_textured_obj(mesh, o + ".obj")
-    cv2.imwrite(o + ".isomap.png", isomap)
+    eos.core.write_textured_obj(mesh, i + "face.obj")
+    cv2.imwrite(i + "face.isomap.bmp", isomap)
 
 if __name__ == "__main__":
-    generate(sys.argv[1], sys.argv[2], sys.argv[3])
+    generate(sys.argv[1])
