@@ -49,12 +49,18 @@ def generate(i) : # input name, output name
         center_point = [shape.parts()[2].x + shape.parts()[31].x,  shape.parts()[2].y + shape.parts()[31].y ]
          
         cl = img[int(center_point[1]/2), int(center_point[0]/2)] # face random color
+        maxy = shape.parts()[24].y
+
+        #from matplotlib import pyplot as plt
+        #cv2.circle(img, (shape.parts()[24].x, shape.parts()[24].y), 10, (0, 0, 255), -1)
+        #plt.imshow(img)
+        #plt.show()
 
         for part in shape.parts():
             landmarks.append(eos.core.Landmark(str(index),[float(part.x),float(part.y)]))
             index +=1
         break
-    
+
     #landmarks = read_pts('res/image_0010.pts')
     # load eos model
     model = eos.morphablemodel.load_model("res/sfm_shape_3448.bin")
@@ -110,6 +116,7 @@ def generate(i) : # input name, output name
     
     img[hair] = dominant
     img[background] = dominant
+    img[ : maxy-50, :] = dominant
     
     #img = cv2.cvtColor(img, cv2.COLOR_RGB2RGB)
     #print(img.shape, type(img))
