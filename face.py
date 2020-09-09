@@ -45,10 +45,16 @@ def generate(i) : # input name, output name
     for box in boxes:
         shape = shape_predictor(img, box)
         index = 1
+
+        center_point = [shape.parts()[2].x + shape.parts()[31].x,  shape.parts()[2].y + shape.parts()[31].y ]
+         
+        cl = img[int(center_point[1]/2), int(center_point[0]/2)] # face random color
+
         for part in shape.parts():
             landmarks.append(eos.core.Landmark(str(index),[float(part.x),float(part.y)]))
             index +=1
-
+        break
+    
     #landmarks = read_pts('res/image_0010.pts')
     # load eos model
     model = eos.morphablemodel.load_model("res/sfm_shape_3448.bin")
@@ -84,27 +90,41 @@ def generate(i) : # input name, output name
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 200, .1)
     flags = cv2.KMEANS_RANDOM_CENTERS
 
-    _, labels, palette = cv2.kmeans(pixels, n_colors, None, criteria, 10, flags)
-    _, counts = np.unique(labels, return_counts=True)
+    #_, labels, palette = cv2.kmeans(pixels, n_colors, None, criteria, 10, flags)
+    #_, counts = np.unique(labels, return_counts=True)
     
     # option 1
-    dominant = palette[np.argmax(counts)] # dominant color.
+    #dominant = palette[np.argmax(counts)] # dominant color.
     
     # option 2
-    dominant = np.average(palette, axis=0 ,weights=counts)
+    #dominant = np.average(palette, axis=0 ,weights=counts)
     
+    # option 3 : any face color...
+    dominant = np.average(img[face], axis=0)
+
+    dominant = cl
+    print(dominant)
     #visualize_dominant(counts, palette, img)
     # for debugging
+
     
     img[hair] = dominant
     img[background] = dominant
     
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
-    print(img.shape, type(img))
+    #img = cv2.cvtColor(img, cv2.COLOR_RGB2RGB)
+    #print(img.shape, type(img))
+    
     isomap = eos.render.extract_texture(mesh, pose, img)
     isomap = cv2.transpose(isomap)
+    isomap = cv2.cvtColor(isomap, cv2.COLOR_RGBA2RGB)
+
+    print(isomap.shape, type(isomap))
+    empty = np.all( isomap == [0, 0, 0], axis=-1)
+    isomap[empty] = dominant
+    
+
     eos.core.write_textured_obj(mesh, i + "face.obj")
-    cv2.imwrite(i + "face.isomap.bmp", isomap)
+    cv2.imwrite(i + "face.isomap.png", isomap)
 
 if __name__ == "__main__":
     generate(sys.argv[1])
