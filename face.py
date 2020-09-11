@@ -154,7 +154,7 @@ def generate(i) : # input name, output name
     img[background] = key_color
     img[face_boarder] = boarder_color
 
-    print(face_boarder.shape)
+    #print(face_boarder.shape)
     
     #앞머리
     img[ : maxy-100 , :] = key_color
@@ -187,30 +187,27 @@ def generate(i) : # input name, output name
     mask_gray[empty] = 255
     #isomap[empty] = (dominant[0], dominant[1], dominant[2], 255)
     
+    """
     from scipy.ndimage import gaussian_filter
     import matplotlib.pyplot as plt
 
     plt.imshow(img)
     plt.show()
-
+    """
     eos.core.write_textured_obj(mesh, i + "face.obj")
 
     isomap = cv2.cvtColor(isomap, cv2.COLOR_RGBA2RGB)
     isomap[use_dst] = dst[use_dst] 
 
         
-    
+    """
     plt.imshow(mask_gray)
     plt.show()
+    """
 
     isomap = cv2.inpaint(isomap, mask_gray, 21, cv2.INPAINT_TELEA) # kernel size (third parameter) could be lower to reduce time delay.
-    
-    plt.imshow(cv2.cvtColor(isomap, cv2.COLOR_BGR2RGB))
-    plt.show()
 
-
-
-    cv2.imwrite(i + "face.isomap.png", isomap)
+    cv2.imwrite(i + "face.isomap.bmp", cv2.cvtColor(isomap, cv2.COLOR_RGB2RGBA))
 
 if __name__ == "__main__":
     generate(sys.argv[1])
