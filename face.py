@@ -65,30 +65,12 @@ def generate(i) : # input name, output name
         M = cv2.getPerspectiveTransform(pts1, pts2)
         dst = cv2.warpPerspective(img, M, (512,512))
 
-        # make inpainted image using good face skin area
-        #inpaint_img = np.zeros_like(img)
-        #inpaint_img[mx:MX, my:MY] = img[mx:MX, my:MY]
-        #inpaint_mask = np.zeros_like(img)
-        #inpaint_mask[mx:MX, my:MY] = [255, 255, 255]
-        #inpaint_mask = cv2.cvtColor(inpaint_mask, cv2.COLOR_BGR2GRAY)
-        #flip = inpaint_mask == 255
-        #flip_inverse = inpaint_mask != 255
-        #inpaint_mask[flip] = 0
-        #inpaint_mask[flip_inverse] = 255
 
-        #inpaint_img = cv2.inpaint(inpaint_img, inpaint_mask, 10, cv2.INPAINT_TELEA)
-        """
-        from matplotlib import pyplot as plt
-        cv2.circle(img, (shape.parts()[0].x, shape.parts()[0].y), 20, (0, 50, 255), -1)
-        cv2.circle(img, (shape.parts()[16].x, shape.parts()[16].y), 20, (0, 50, 255), -1)
-        plt.imshow(img)
-        plt.show()
-        exit()
-        """
         for part in shape.parts():
             landmarks.append(eos.core.Landmark(str(index),[float(part.x),float(part.y)]))
             index +=1
-        break
+
+        break # 첫 번째 얼굴만 적용
 
     # load eos model
     model = eos.morphablemodel.load_model("res/sfm_shape_3448.bin")
@@ -119,6 +101,7 @@ def generate(i) : # input name, output name
     background = seg == 0
     hair = seg == 127
     face = seg == 254
+    
     # find donminant face color..
     #pixels = np.float32(img[face].reshape(-1, 3))
     
@@ -137,13 +120,13 @@ def generate(i) : # input name, output name
     #dominant = np.average(palette, axis=0 ,weights=counts)
     
     # option 3 : any face color...
-    #dominant = np.average(img[face], axis=0)
+    
+    hair_dominant = np.average(img[hair], axis=0).astype('uint8')
     
     # option 4 : face color
     # dominant = cl
 
     #visualize_dominant(counts, palette, img)
-    # for debugging
 
     # key color
     key_color = [7, 28, 98]
@@ -159,11 +142,7 @@ def generate(i) : # input name, output name
     #앞머리
     img[ : maxy-100 , :] = key_color
     img[ : maxy_2 - 100, :] = key_color
-    
-    # 옆면
-    #img[:y0,:x0] = key_color
-    #img[:y16, x16: ] = key_color
-    
+        
 
     isomap = eos.render.extract_texture(mesh, pose, img)
     isomap = cv2.transpose(isomap)
@@ -183,31 +162,20 @@ def generate(i) : # input name, output name
     mask_gray = np.zeros_like(mask).astype('uint8')
     mask_gray[mask] = 255
     kernel = np.ones((5,5), np.uint8)
-    mask_gray = cv2.dilate(mask_gray, kernel, iterations=3)
+    mask_gray = cv2.dilate(mask_gray, kernel, iterations=7)
     mask_gray[empty] = 255
     #isomap[empty] = (dominant[0], dominant[1], dominant[2], 255)
     
-    """
-    from scipy.ndimage import gaussian_filter
-    import matplotlib.pyplot as plt
-
-    plt.imshow(img)
-    plt.show()
-    """
     eos.core.write_textured_obj(mesh, i + "face.obj")
 
     isomap = cv2.cvtColor(isomap, cv2.COLOR_RGBA2RGB)
     isomap[use_dst] = dst[use_dst] 
 
-        
-    """
-    plt.imshow(mask_gray)
-    plt.show()
-    """
-
     isomap = cv2.inpaint(isomap, mask_gray, 21, cv2.INPAINT_TELEA) # kernel size (third parameter) could be lower to reduce time delay.
 
-    cv2.imwrite(i + "face.isomap.bmp", cv2.cvtColor(isomap, cv2.COLOR_RGB2RGBA))
+    cv2.imwrite(i + "face.isomap.png", cv2.cvtColor(isomap, cv2.COLOR_RGB2RGBA))
+
+    return ((hair_dominant[2], hair_dominant[1], hair_dominant[0]), cv2.cvtColor(dst, cv2.COLOR_BGR2RGB)) # return (r,g,b) of color, face color image.
 
 if __name__ == "__main__":
-    generate(sys.argv[1])
+    a, b = generate(sys.argv[1])
